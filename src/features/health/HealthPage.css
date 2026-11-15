@@ -1,0 +1,25 @@
+.health-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 40rem;
+  padding: var(--space-8) var(--space-6);
+}
+
+.health-page__subtitle {
+  color: var(--text-muted);
+}
+
+.health-page__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.health-page__line--ok .ui-icon {
+  color: var(--verdict-accepted);
+}
+
+.health-page__line--error {
+  color: var(--danger);
+}
