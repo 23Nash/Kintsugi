@@ -14,6 +14,9 @@ Record every choice the handoff left open, every departure from it, and every ne
 - Found: git 2.55.0.windows.3, Node.js 24.20.0 (via nvm4w), npm 11.19.0, corepack 0.35.0, WebView2 157.0.4341.46.
 - Installed by the setup agent with owner approval: rustup 1.29.3 (`winget install --id Rustlang.Rustup`), host `x86_64-pc-windows-msvc`; pnpm 12.18.0 (`corepack enable pnpm`).
 - Missing at setup: Microsoft C++ Build Tools. Needs admin; left to the owner.
+- Installed by the owner, 2026-11-13: Visual Studio Build Tools 2026 (18.12.12405.243), "Desktop development with C++", Windows SDK 10.0.26100.
+- Project folder renamed by the owner from `New folder` to `Kintsugi`. No tracked file depends on the folder name.
+- `vite.config.ts` ignores `target/` and `crates/` as well as `src-tauri/`: the workspace moved `target/` to the root, and Vite's watcher hit `EBUSY` locks on build output during `tauri dev`.
 
 ## Versions
 
