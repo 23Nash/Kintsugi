@@ -1,0 +1,54 @@
+.ui-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-hair);
+  padding: var(--space-hair) var(--space-2);
+  border-radius: var(--radius-sm);
+  font: var(--type-label);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.ui-verdict--accepted {
+  color: var(--verdict-accepted);
+  background: var(--verdict-accepted-bg);
+}
+
+.ui-verdict--wrong {
+  color: var(--verdict-wrong);
+  background: var(--verdict-wrong-bg);
+}
+
+.ui-verdict--time {
+  color: var(--verdict-time);
+  background: var(--verdict-time-bg);
+}
+
+.ui-verdict--memory {
+  color: var(--verdict-memory);
+  background: var(--verdict-memory-bg);
+}
+
+.ui-verdict--runtime {
+  color: var(--verdict-runtime);
+  background: var(--verdict-runtime-bg);
+}
+
+.ui-verdict--compile {
+  color: var(--verdict-compile);
+  background: var(--verdict-compile-bg);
+}
+
+.ui-verdict--pending {
+  color: var(--verdict-pending);
+  background: var(--verdict-pending-bg);
+}
+
+.ui-verdict--repaired {
+  color: var(--accent-gold-text);
+  background: var(--gold-soft);
+}
+
+.ui-verdict--repaired .ui-verdict__icon {
+  color: var(--accent-gold);
+}

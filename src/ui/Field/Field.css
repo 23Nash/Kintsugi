@@ -1,0 +1,59 @@
+.ui-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.ui-field__label {
+  font: var(--type-label);
+}
+
+.ui-field__help {
+  color: var(--text-muted);
+  font: var(--type-small);
+}
+
+.ui-field__error {
+  color: var(--danger);
+  font: var(--type-small);
+}
+
+/* Shared control look for Input and Select. */
+.ui-control {
+  width: 100%;
+  height: var(--control-md);
+  padding: 0 var(--space-2);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.ui-control--sm {
+  height: var(--control-sm);
+}
+
+.ui-control::placeholder {
+  color: var(--text-muted);
+}
+
+.ui-control:hover:not(:disabled) {
+  border-color: var(--text-muted);
+}
+
+.ui-control:focus-visible {
+  outline-offset: 0;
+  border-color: var(--focus-ring);
+}
+
+.ui-control[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.ui-control:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
