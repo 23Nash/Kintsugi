@@ -1,0 +1,26 @@
+.ui-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+}
+
+.ui-empty__icon {
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.ui-empty__title {
+  font: var(--type-body-strong);
+}
+
+.ui-empty__text {
+  max-width: 48ch;
+  color: var(--text-muted);
+}
+
+.ui-empty__action {
+  margin-top: var(--space-3);
+}
