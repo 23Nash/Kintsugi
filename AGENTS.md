@@ -4,14 +4,8 @@ Kintsugi is a local desktop app that tracks the owner's competitive programming 
 
 ## Commands
 
-| Task               | Rust                                                    | TypeScript                            |
-| ------------------ | ------------------------------------------------------- | ------------------------------------- |
-| Install            | (via Cargo on build)                                    | `pnpm install --frozen-lockfile`      |
-| Run in development | `pnpm tauri dev` (both sides)                           | `pnpm tauri dev`                      |
-| Format             | `cargo fmt --all`                                       | `pnpm format`                         |
-| Lint               | `cargo clippy --workspace --all-targets -- -D warnings` | `pnpm lint` (ESLint + Prettier check) |
-| Type check         | covered by `cargo clippy`                               | `pnpm typecheck`                      |
-| Test               | `cargo test --workspace`                                | `pnpm test`                           |
+- Run the app: `pnpm dev:log` in the background. It runs `pnpm tauri dev` and writes output to `tauri-dev.log`. Wait on it with a background `until grep -qE "kintsugi\.exe|error|ELIFECYCLE" tauri-dev.log; do sleep 1; done`. `ELIFECYCLE ... -1` means the window was closed.
+- Format: `cargo fmt --all` and `pnpm format`. The other checks are in the done gate below.
 
 ## Done gate
 
@@ -39,6 +33,7 @@ If passing would mean skipping a test, allowing a lint, loosening a rule, or tur
 ## Frontend
 
 - Components call typed wrappers in `src/lib/api.ts`; it is the only file that imports `@tauri-apps/api/core` (ESLint enforces this). Every command gets a wrapper there.
+- Screens and styling: read `docs/design-system.md` first. Primitives live in `src/ui/<Name>/`, and colors come from tokens in `src/ui/tokens.css`.
 - Screen logic is a pure reducer over a discriminated-union state (see `src/features/health/healthMachine.ts`). Components render state and dispatch events; side effects run in `useEffect` keyed on the state that needs them. React's `useReducer` only; ask before adding a state library.
 
 ## Database
@@ -49,8 +44,7 @@ If passing would mean skipping a test, allowing a lint, loosening a rule, or tur
 
 ## Rust
 
-- Return errors through `tracker_core::Error`; use `?`, never `unwrap` or `expect` outside tests (Clippy denies them).
-- `unsafe` is forbidden workspace-wide.
+- Return errors through `tracker_core::Error` and propagate them with `?`.
 
 ## Tests
 
