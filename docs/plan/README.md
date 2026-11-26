@@ -1,6 +1,8 @@
 # Next-phase plan (draft for review)
 
-Written overnight on 2026-11-25 by five read-only planning agents, then reconciled into one sequence. Updated 2026-11-26 after PRs #1 and #2 merged; see [Changes since the first draft](#changes-since-the-first-draft). Nothing here is implemented or decided yet. Every default below is an assumption you can overturn; the ones that matter most are in [Decisions for you](#decisions-for-you).
+> Want the short, plain version first? Read [steps.md](steps.md). This file has the reasoning and reconciliations behind it.
+
+Written overnight on 2026-11-25 by five read-only planning agents, then reconciled into one sequence. Updated 2026-11-26 after PRs #1 to #4 merged; see [Changes since the first draft](#changes-since-the-first-draft). Nothing here is implemented or decided yet. Every default below is an assumption you can overturn; the ones that matter most are in [Decisions for you](#decisions-for-you).
 
 | Appendix                                         | Area                                                                    |
 | ------------------------------------------------ | ----------------------------------------------------------------------- |
@@ -12,8 +14,14 @@ Written overnight on 2026-11-25 by five read-only planning agents, then reconcil
 
 ## Where things stand
 
-- `main` at `865ab46` (#1 Vite watcher fix and #2 design system, both merged) passes the full done gate: 8/8 steps, 3 Rust tests, 55 frontend tests across 18 files. (In a fresh Linux container the Tauri system packages from `ci.yml` must be installed first, or clippy fails on `gdk-sys`.)
+- `main` at `a79db7d` (#1 Vite watcher fix, #2 design system, #3 Claude launch config, #4 guardrails, all merged) passes the full done gate: 8/8 steps, 3 Rust tests, 58 frontend tests across 19 files. (In a fresh Linux container the Tauri system packages from `ci.yml` must be installed first, or clippy fails on `gdk-sys`.)
 - No open PRs. The design system in `src/ui/` (tokens, 14 primitives, `docs/design-system.md`) is what appendix D reviewed: #2 merged at the same head commit, `0298e2f`, so D's follow-up list still applies unchanged.
+- #4 added guardrails that new work must satisfy:
+  - Stylelint fails `pnpm lint` on raw colors outside `src/ui/tokens.css`;
+  - `src/ui/structure.test.ts` requires each `src/ui/<Name>/` folder to hold `<Name>.tsx` and its test;
+  - CI runs actionlint first;
+  - a Claude PostToolUse hook runs Prettier after every Write or Edit.
+- AGENTS.md now points screen work at `docs/design-system.md` and documents `pnpm dev:log` for running the app. It no longer restates the `unwrap`/`unsafe` bans, but `Cargo.toml` still enforces them.
 - Visual Studio Build Tools 2026 is installed on your Windows machine (recorded in `decisions.md`, 2026-11-13). Appendix B was written assuming the MSVC toolchain was missing, which was the main risk for the TLS choice in M2.6.
 
 ## The plan in brief
@@ -64,7 +72,7 @@ Each line is one small PR that passes the done gate on its own. Letters point to
 
 ### M0 Foundations (no feature behaviour)
 
-1. CI: run `push` only on `main` (PRs currently run twice), and `rust-cache` `save-if` main. (E)
+1. CI: run `push` only on `main` (PRs currently run twice), and `rust-cache` `save-if` main. Keep #4's actionlint step first; it will lint this change. (E)
 2. `migration_count()` helper; replace the two hard-coded `applied_migrations == 1` asserts, which break on the next migration. (A, E)
 3. Dev builds use `kintsugi-dev.db`, plus a `KINTSUGI_DB_PATH` override. **Must land before any feature migration.** (E)
 4. `open()`: WAL, `synchronous = NORMAL`, explicit `foreign_keys` and `busy_timeout`. Refuse a database made by a newer app version. Back up with `VACUUM INTO backups/` before pending migrations, keeping 5. (A, E)
@@ -102,7 +110,7 @@ Each line is one small PR that passes the done gate on its own. Letters point to
 
 ### M4a UI follow-ups and app shell (can start after M0.6)
 
-1. Design-system follow-ups on the merged `src/ui/`, one PR each or grouped by size:
+1. Design-system follow-ups on the merged `src/ui/`, one PR each or grouped by size. New primitives (`Meter`, `Kbd`, `Alert`) each get their own `src/ui/<Name>/` folder with `<Name>.tsx` and a test, and colors only from tokens; the structure test and Stylelint enforce both.
    - `Tabs` renders only the selected panel (today it mounts every panel, so screens with their own data loading would all fetch at once);
    - an `other` verdict badge for SKIPPED, CHALLENGED, OLE and judge errors;
    - nav and action icons;
@@ -178,4 +186,12 @@ Smaller questions are listed at the end of each appendix.
 - Decision 5 changed from "when does #2 merge" to "build M4a alongside M1".
 - M2.6: Build Tools 2026 is installed on Windows, so the aws-lc-rs build risk is mostly gone. One Windows build is still worth doing first.
 - M0.8: noted that dev mode now injects the design system's stylesheets, which `devCsp` has to allow.
-- Superseded in the appendices: E's PR step 0 ("merge #1, then rebase and merge #2") and B's note that the MSVC toolchain is missing. Everything else in them stands.
+- Added [steps.md](steps.md), a plain-language version of this plan.
+
+2026-11-26, after #3 (Claude launch config) and #4 (guardrails) merged:
+
+- Re-ran the done gate: 8/8 pass, 58 frontend tests. `pnpm lint` now includes Stylelint.
+- M0.1 keeps the new actionlint step. M4a's new primitives must satisfy the folder-structure test and the token-only color rule.
+- Nothing in the plan conflicts with #3 or #4.
+
+Still superseded in the appendices: E's PR step 0 ("merge #1, then rebase and merge #2") and B's note that the MSVC toolchain is missing. Everything else in them stands.
