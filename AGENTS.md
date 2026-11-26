@@ -59,3 +59,17 @@ If passing would mean skipping a test, allowing a lint, loosening a rule, or tur
 
 - Every new dependency, Rust or JavaScript, gets a line in `docs/decisions.md` saying why.
 - Small commits, one concern each.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on this repo, driven through `gh api` (REST only). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` and `docs/adr/`. See `docs/agents/domain.md`.
