@@ -8,6 +8,29 @@ pub enum Error {
 
     #[error("migration error: {0}")]
     Migration(#[from] sqlx::migrate::MigrateError),
+
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("not found")]
+    NotFound,
+
+    #[error("{message}")]
+    Validation {
+        message: String,
+        field: Option<String>,
+    },
+
+    #[error("serialization error: {0}")]
+    Serialization(#[from] serde_json::Error),
+
+    #[error(
+        "this database was made by a newer Kintsugi (database version {db}, this app knows up to {app})"
+    )]
+    NewerDatabase { db: i64, app: i64 },
+
+    #[error("this database has a migration this app does not know (version {version})")]
+    UnknownMigration { version: i64 },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

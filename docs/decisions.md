@@ -53,11 +53,12 @@ Record every choice the handoff left open, every departure from it, and every ne
 - Release profile moved from `src-tauri/Cargo.toml` to the workspace root; Cargo ignores profiles in members.
 - sqlx features: `default-features = false`, plus `runtime-tokio`, `sqlite`, `migrate`, `macros`. `macros` is there for `sqlx::migrate!`, which embeds migrations in the binary. No TLS feature: no network database.
 - Runtime query functions (`sqlx::query`, `query_as`, `query_scalar`), not the compile-time checked macros. The workspace builds without `DATABASE_URL` or `.sqlx` offline metadata. Revisit if the query count grows.
-- `tracker_core::Pool` is a re-export of `sqlx::SqlitePool`, so `src-tauri` has no direct sqlx dependency.
+- `tracker_core::Pool` is a re-export of `sqlx::SqlitePool`, so `src-tauri` has no sqlx in its normal dependencies; sqlx is a dev-dependency there, for tests only.
+- `src-tauri` dev-dependencies `serde_json` (to check the JSON shape of `CommandError` in tests) and `sqlx` (to build sqlx error values in the `CommandError` mapping tests); neither is in the shipped app.
 - In-memory test pool: one connection, never closed, because each SQLite `:memory:` connection is a separate database.
 - Startup opens the database in `setup` with `tauri::async_runtime::block_on`. A failure is stored as `DbState::Failed(message)` instead of aborting, so the window opens and the page shows the error.
-- `CommandError { kind, message }` is the serialisable error for every command. `kind`: `databaseUnavailable` or `database`.
-- Database file name: `kintsugi.db`.
+- `CommandError { kind, message, field? }` is the serialisable error for every command. `kind` is one of the 9 kinds in `src-tauri/src/error.rs`, mirrored by `API_ERROR_KINDS` in `src/lib/api.ts`.
+- Database file name: `kintsugi.db` in release builds, `kintsugi-dev.db` in debug builds; `KINTSUGI_DB_PATH` overrides both.
 
 ## Schema
 
@@ -90,6 +91,7 @@ Record every choice the handoff left open, every departure from it, and every ne
 | `sqlx`                                                 | Database access and migrations (handoff)                                                                                         |
 | `tokio` (dev, core)                                    | Async test runtime (`#[tokio::test]`); the app uses Tauri's Tokio runtime                                                        |
 | `thiserror`                                            | Core error type (handoff)                                                                                                        |
+| `serde_json` (core)                                    | Core `Serialization` error wraps `serde_json::Error`                                                                             |
 | `serde`                                                | Serialise `Health` and `CommandError` to the frontend                                                                            |
 | `eslint`, `@eslint/js`, `typescript-eslint`, `globals` | ESLint (handoff)                                                                                                                 |
 | `eslint-plugin-react-hooks`                            | Enforce hook rules; the reducer pattern leans on `useEffect`                                                                     |
@@ -98,6 +100,10 @@ Record every choice the handoff left open, every departure from it, and every ne
 | `jsdom`                                                | DOM for component tests                                                                                                          |
 | `@testing-library/react`, `@testing-library/dom`       | Render components and query by role in tests                                                                                     |
 | `stylelint` (18.0.0, exact)                            | Fail `pnpm lint` on raw colors outside `src/ui/tokens.css`. Owner-approved 2026-11-26. 18.0.0, not 18.1.0: 18.1.0 was 6 days old |
+| `tauri-plugin-log` (2.10.2, Rust only)                 | Log file in the app log dir plus stdout, with rotation. 2.x to match Tauri 2; 3.0 is alpha. No JS package, no capability         |
+| `log` (src-tauri)                                      | Direct dependency so the shell logs through the same facade the plugin installs                                                  |
+
+- Removed `panic = "abort"` from the release profile (plan decision 4): a panic in a background task unwinds instead of killing the app, and the panic hook can log it.
 
 ## CI
 

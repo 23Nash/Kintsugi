@@ -4,7 +4,7 @@ Kintsugi is a local desktop app that tracks the owner's competitive programming 
 
 ## Commands
 
-- Run the app: `pnpm dev:log` in the background. It runs `pnpm tauri dev` and writes output to `tauri-dev.log`. Wait on it with a background `until grep -qE "kintsugi\.exe|error|ELIFECYCLE" tauri-dev.log; do sleep 1; done`. `ELIFECYCLE ... -1` means the window was closed.
+- Run the app: `pnpm dev:log` in the background. It runs `pnpm tauri dev` and writes output to `tauri-dev.log`. Wait on it with a background `until grep -qE "kintsugi\.exe|error|ELIFECYCLE" tauri-dev.log; do sleep 1; done`. `ELIFECYCLE ... -1` means the window was closed. `tauri dev` opens `kintsugi-dev.db`, never the real `kintsugi.db`; agents never open the real database. `KINTSUGI_DB_PATH` overrides the path.
 - Format: `cargo fmt --all` and `pnpm format`. The other checks are in the done gate below.
 
 ## Plan
@@ -49,6 +49,7 @@ If passing would mean skipping a test, allowing a lint, loosening a rule, or tur
 
 ## Rust
 
+- Error kinds are listed twice: `ErrorKind` in `src-tauri/src/error.rs` and `API_ERROR_KINDS` in `src/lib/api.ts`. Adding a kind means editing both lists and both drift tests (the Rust test in `error.rs` and the TS test beside `api.ts`).
 - Return errors through `tracker_core::Error` and propagate them with `?`.
 
 ## Tests

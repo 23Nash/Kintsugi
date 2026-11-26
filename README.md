@@ -61,11 +61,31 @@ The frontend is built first because the Tauri crate expects `dist/` to exist whe
 pnpm tauri dev
 ```
 
-The page shows the database health. The database is `kintsugi.db` in the app data directory for identifier `dev.nash.kintsugi`:
+The page shows the database health. The database lives in the app data directory for identifier `dev.nash.kintsugi`:
 
-- Windows: `%APPDATA%\dev.nash.kintsugi\kintsugi.db`
-- Linux: `~/.local/share/dev.nash.kintsugi/kintsugi.db`
-- macOS: `~/Library/Application Support/dev.nash.kintsugi/kintsugi.db`
+- `pnpm tauri dev` (debug build) opens `kintsugi-dev.db`.
+- The release build opens `kintsugi.db`.
+- `KINTSUGI_DB_PATH` overrides the full path in either build.
+
+App data directory by OS:
+
+- Windows: `%APPDATA%\dev.nash.kintsugi\`
+- Linux: `~/.local/share/dev.nash.kintsugi/`
+- macOS: `~/Library/Application Support/dev.nash.kintsugi/`
+
+## Backups
+
+When an existing database (one with any table) has pending migrations, `open` first writes a backup to a `backups` directory next to the database file, named `kintsugi-<utc timestamp>-pre-<target version>.db`. The newest 5 are kept. If a backup for the same target version already exists, no new one is written, so a migration that keeps failing cannot push older restore points out. A new database, or a launch with nothing pending, makes none.
+
+To restore by hand: quit Kintsugi, copy the backup over the database file, and delete the `-wal` and `-shm` files next to it.
+
+## Logs
+
+Logs are written to the app log directory, in `dev.nash.kintsugi` (file `kintsugi.log`, rotated at about 1 MB, 5 files kept), and to stdout:
+
+- Windows: `%LOCALAPPDATA%\dev.nash.kintsugi\logs\`
+- Linux: `~/.local/share/dev.nash.kintsugi/logs/`
+- macOS: `~/Library/Logs/dev.nash.kintsugi/`
 
 ## Layout
 
