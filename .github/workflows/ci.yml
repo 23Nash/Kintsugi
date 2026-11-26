@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 permissions:
@@ -42,7 +43,10 @@ jobs:
       - name: Install Rust toolchain
         run: rustup toolchain install
 
+      # Only main saves the cache, so branch runs don't evict it.
       - uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       # Version comes from "packageManager" in package.json.
       - uses: pnpm/action-setup@v6
