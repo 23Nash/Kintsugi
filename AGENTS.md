@@ -49,6 +49,7 @@ If passing would mean skipping a test, allowing a lint, loosening a rule, or tur
 
 ## Rust
 
+- Error kinds are listed twice: `ErrorKind` in `src-tauri/src/error.rs` and `API_ERROR_KINDS` in `src/lib/api.ts`. Adding a kind means editing both lists and both drift tests (the Rust test in `error.rs` and the TS test beside `api.ts`).
 - Return errors through `tracker_core::Error` and propagate them with `?`.
 
 ## Tests

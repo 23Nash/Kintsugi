@@ -56,7 +56,7 @@ Record every choice the handoff left open, every departure from it, and every ne
 - `tracker_core::Pool` is a re-export of `sqlx::SqlitePool`, so `src-tauri` has no direct sqlx dependency.
 - In-memory test pool: one connection, never closed, because each SQLite `:memory:` connection is a separate database.
 - Startup opens the database in `setup` with `tauri::async_runtime::block_on`. A failure is stored as `DbState::Failed(message)` instead of aborting, so the window opens and the page shows the error.
-- `CommandError { kind, message }` is the serialisable error for every command. `kind`: `databaseUnavailable` or `database`.
+- `CommandError { kind, message, field? }` is the serialisable error for every command. `kind` is one of the 9 kinds in `src-tauri/src/error.rs`, mirrored by `API_ERROR_KINDS` in `src/lib/api.ts`.
 - Database file name: `kintsugi.db` in release builds, `kintsugi-dev.db` in debug builds; `KINTSUGI_DB_PATH` overrides both.
 
 ## Schema
@@ -90,6 +90,7 @@ Record every choice the handoff left open, every departure from it, and every ne
 | `sqlx`                                                 | Database access and migrations (handoff)                                                                                         |
 | `tokio` (dev, core)                                    | Async test runtime (`#[tokio::test]`); the app uses Tauri's Tokio runtime                                                        |
 | `thiserror`                                            | Core error type (handoff)                                                                                                        |
+| `serde_json` (core)                                    | Core `Serialization` error wraps `serde_json::Error`                                                                             |
 | `serde`                                                | Serialise `Health` and `CommandError` to the frontend                                                                            |
 | `eslint`, `@eslint/js`, `typescript-eslint`, `globals` | ESLint (handoff)                                                                                                                 |
 | `eslint-plugin-react-hooks`                            | Enforce hook rules; the reducer pattern leans on `useEffect`                                                                     |

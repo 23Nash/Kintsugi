@@ -1918,6 +1918,8 @@ version = "0.1.0"
 dependencies = [
  "log",
  "serde",
+ "serde_json",
+ "sqlx",
  "tauri",
  "tauri-build",
  "tauri-plugin-log",
@@ -4255,6 +4257,7 @@ name = "tracker-core"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "serde_json",
  "sqlx",
  "thiserror 2.0.21",
  "tokio",

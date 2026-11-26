@@ -12,6 +12,18 @@ pub enum Error {
     #[error("backup error: {0}")]
     Io(#[from] std::io::Error),
 
+    #[error("not found")]
+    NotFound,
+
+    #[error("{message}")]
+    Validation {
+        message: String,
+        field: Option<String>,
+    },
+
+    #[error("serialization error: {0}")]
+    Serialization(#[from] serde_json::Error),
+
     #[error(
         "this database was made by a newer Kintsugi (database version {db}, this app knows up to {app})"
     )]
