@@ -30,14 +30,7 @@ Everything else is worked out from those facts: whether a problem is broken or r
 
 ## Words used in this plan
 
-- **Attempt:** a run of submissions to one problem with no gap over 4 hours.
-- **Broken:** you failed the problem and haven't cleanly re-solved it since.
-  - "Failed" means no AC, or 2 or more wrong submissions before the AC, or you read the editorial.
-- **Repaired (gold):** a broken problem you later re-solved cleanly, a few days after failing it.
-- **Mastered:** re-solved cleanly at every step of the review ladder. It is no longer scheduled.
-- **Retired:** you chose to skip it. It is out of reviews but still counts in stats.
-- **Review ladder:** the gaps between re-solves: 3 days, then 10, 30 and 90.
-- **Weak topic:** a topic where your estimated level is clearly below your overall level, with at least 3 problems behind the estimate.
+Attempt, failed, broken, repaired, mastered, retired, review ladder and weak topic are defined in the root [GLOSSARY.md](../../GLOSSARY.md).
 
 ## Order of work
 

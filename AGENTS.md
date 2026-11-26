@@ -9,7 +9,8 @@ Kintsugi is a local desktop app that tracks the owner's competitive programming 
 
 ## Plan
 
-- The next-phase plan is `docs/plan/steps.md`: milestones M0 to M7, each step one small PR. Reasoning and detail are in `docs/plan/README.md` and its appendices. Take the next unstarted step in milestone order. Where the plan lists an owner decision, use its default unless the owner has answered.
+- The roadmap is `docs/plan/steps.md`: milestones M0 to M7. Reasoning and detail are in `docs/plan/README.md` and its appendices. Where the plan lists an owner decision, use its default unless the owner has answered.
+- The owner starts a milestone by turning it into a spec issue with tickets (`/to-spec`, `/to-tickets`); `steps.md` links each started milestone to its spec issue. Agents build tickets from the GitHub board, not steps straight from `steps.md`: the owner runs `/orchestrate` (`.claude/skills/orchestrate/SKILL.md`). Leave tickets assigned or under an `orchestrating` spec to it.
 
 ## Done gate
 
@@ -59,3 +60,17 @@ If passing would mean skipping a test, allowing a lint, loosening a rule, or tur
 
 - Every new dependency, Rust or JavaScript, gets a line in `docs/decisions.md` saying why.
 - Small commits, one concern each.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on this repo, driven through `gh api` (REST only). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` and `docs/adr/`. See `docs/agents/domain.md`.
