@@ -105,6 +105,7 @@ Record every choice the handoff left open, every departure from it, and every ne
 - `rustup toolchain install` reads `rust-toolchain.toml`; no third-party Rust action.
 - Actions: `actions/checkout@v7`, `Swatinem/rust-cache@v2`, `pnpm/action-setup@v6`, `actions/setup-node@v7` (`cache: pnpm`). Latest tags on 2026-11-11.
 - Runs on every push and pull request, with read-only `contents` permission.
+- First step runs actionlint 1.7.12 (download script pinned to the `v1.7.12` tag) on the workflows. It runs in CI because the local download was blocked during setup. It sits inside the `check` job, so branch protection on `main` covers it.
 
 ## Deferred
 

@@ -17,6 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Lints this workflow; shellcheck (preinstalled on Ubuntu runners) checks the run scripts.
+      - name: Lint workflows with actionlint
+        run: |
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
+          ./actionlint -color
+        shell: bash
+
       # Packages from https://v2.tauri.app/start/prerequisites/ (Debian/Ubuntu).
       - name: Install Tauri system packages
         run: |
