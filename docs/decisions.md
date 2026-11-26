@@ -53,7 +53,8 @@ Record every choice the handoff left open, every departure from it, and every ne
 - Release profile moved from `src-tauri/Cargo.toml` to the workspace root; Cargo ignores profiles in members.
 - sqlx features: `default-features = false`, plus `runtime-tokio`, `sqlite`, `migrate`, `macros`. `macros` is there for `sqlx::migrate!`, which embeds migrations in the binary. No TLS feature: no network database.
 - Runtime query functions (`sqlx::query`, `query_as`, `query_scalar`), not the compile-time checked macros. The workspace builds without `DATABASE_URL` or `.sqlx` offline metadata. Revisit if the query count grows.
-- `tracker_core::Pool` is a re-export of `sqlx::SqlitePool`, so `src-tauri` has no direct sqlx dependency.
+- `tracker_core::Pool` is a re-export of `sqlx::SqlitePool`, so `src-tauri` has no sqlx in its normal dependencies; sqlx is a dev-dependency there, for tests only.
+- `src-tauri` dev-dependencies `serde_json` (to check the JSON shape of `CommandError` in tests) and `sqlx` (to build sqlx error values in the `CommandError` mapping tests); neither is in the shipped app.
 - In-memory test pool: one connection, never closed, because each SQLite `:memory:` connection is a separate database.
 - Startup opens the database in `setup` with `tauri::async_runtime::block_on`. A failure is stored as `DbState::Failed(message)` instead of aborting, so the window opens and the page shows the error.
 - `CommandError { kind, message, field? }` is the serialisable error for every command. `kind` is one of the 9 kinds in `src-tauri/src/error.rs`, mirrored by `API_ERROR_KINDS` in `src/lib/api.ts`.
