@@ -1,0 +1,41 @@
+.ui-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+}
+
+.ui-spinner__ring {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: ui-spin 700ms linear infinite;
+}
+
+.ui-spinner--sm .ui-spinner__ring {
+  width: 12px;
+  height: 12px;
+  border-width: 1.5px;
+}
+
+@keyframes ui-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes ui-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* No rotation under reduced motion: a slow opacity pulse instead. */
+@media (prefers-reduced-motion: reduce) {
+  .ui-spinner__ring {
+    border-color: var(--accent);
+    animation: ui-pulse 2s ease-in-out infinite;
+  }
+}

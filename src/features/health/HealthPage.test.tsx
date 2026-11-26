@@ -26,6 +26,18 @@ describe("HealthPage", () => {
     );
   });
 
+  it("disables Check again while loading and enables it after", async () => {
+    health.mockResolvedValue({ appliedMigrations: 2 });
+
+    render(<HealthPage />);
+
+    const button = screen.getByRole("button", { name: "Check again" });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText("Checking database…")).toBeTruthy();
+    await screen.findByRole("status");
+    expect((button as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it("shows the error when the health command fails", async () => {
     health.mockRejectedValue({
       kind: "databaseUnavailable",

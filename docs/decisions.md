@@ -14,6 +14,9 @@ Record every choice the handoff left open, every departure from it, and every ne
 - Found: git 2.55.0.windows.3, Node.js 24.20.0 (via nvm4w), npm 11.19.0, corepack 0.35.0, WebView2 157.0.4341.46.
 - Installed by the setup agent with owner approval: rustup 1.29.3 (`winget install --id Rustlang.Rustup`), host `x86_64-pc-windows-msvc`; pnpm 12.18.0 (`corepack enable pnpm`).
 - Missing at setup: Microsoft C++ Build Tools. Needs admin; left to the owner.
+- Installed by the owner, 2026-11-13: Visual Studio Build Tools 2026 (18.12.12405.243), "Desktop development with C++", Windows SDK 10.0.26100.
+- Project folder renamed by the owner from `New folder` to `Kintsugi`. No tracked file depends on the folder name.
+- `vite.config.ts` ignores `target/` and `crates/` as well as `src-tauri/`: the workspace moved `target/` to the root, and Vite's watcher hit `EBUSY` locks on build output during `tauri dev`.
 
 ## Versions
 
@@ -74,6 +77,11 @@ Record every choice the handoff left open, every departure from it, and every ne
 - Prettier config: defaults (`{}`).
 - Removed scaffold demo screen, CSS, and logos; the page title is "Kintsugi".
 - `src/features/health/` holds the health page. It is infrastructure, not tracker domain.
+- Design system, owner-approved palette 2026-11-15: plain CSS custom properties in `src/ui/tokens.css`, primitives in `src/ui/<Name>/`. No CSS framework, icon library, or tooltip library; no dependency added. Reference: `docs/design-system.md`.
+- Theme colors use `light-dark()` instead of duplicated light and dark blocks: one value per token, and `data-theme` works on any subtree, which the review page needs to show both themes at once. Needs Chromium 123+ (WebView2) or Safari 17.5+ (WebKit).
+- System fonts only (Segoe UI Variable, Cascadia Mono, with fallbacks): no font files to ship or license.
+- Gold is reserved for the repaired state. Primary actions and focus use a blue accent; Time limit is plum so it never reads as gold.
+- Dev-only review page at `?design=1`, in `src/features/design/`, gated on `import.meta.env.DEV`; App.tsx shows a "Design system (dev)" link in development.
 
 ## Dependencies added
 

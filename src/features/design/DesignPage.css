@@ -1,0 +1,137 @@
+.design {
+  padding: var(--space-6);
+}
+
+.design__header {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.design__theme {
+  width: 10rem;
+  margin-left: auto;
+}
+
+.design__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(34rem, 1fr));
+  gap: var(--space-4);
+}
+
+.design__panel {
+  min-width: 0;
+  padding: var(--space-6);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.design__panel-title {
+  margin-bottom: var(--space-4);
+  color: var(--text-muted);
+  font: var(--type-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.design__showcase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.design__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.design__section-title {
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--border);
+}
+
+.design__group-title {
+  margin-bottom: var(--space-2);
+  color: var(--text-muted);
+  font: var(--type-label);
+}
+
+.design__swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--space-1) var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.design__swatch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--type-mono-small);
+}
+
+.design__chip {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.design__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.design__type-row {
+  display: grid;
+  grid-template-columns: 11rem 1fr;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.design__meta {
+  color: var(--text-muted);
+  font: var(--type-mono-small);
+}
+
+.design__space {
+  height: 12px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.design__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.design__tile {
+  display: grid;
+  place-items: center;
+  width: 7.5rem;
+  height: 4rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  font: var(--type-mono-small);
+}
+
+.design__icons {
+  color: var(--text-muted);
+  gap: var(--space-3);
+}
+
+.design__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
