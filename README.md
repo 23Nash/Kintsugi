@@ -75,7 +75,7 @@ App data directory by OS:
 
 ## Backups
 
-When an existing database has pending migrations, `open` first writes a backup to a `backups` directory next to the database file, named `kintsugi-<utc timestamp>-pre-<target version>.db`. The newest 5 are kept. A new database, or a launch with nothing pending, makes none.
+When an existing database (one with any table) has pending migrations, `open` first writes a backup to a `backups` directory next to the database file, named `kintsugi-<utc timestamp>-pre-<target version>.db`. The newest 5 are kept. If a backup for the same target version already exists, no new one is written, so a migration that keeps failing cannot push older restore points out. A new database, or a launch with nothing pending, makes none.
 
 To restore by hand: quit Kintsugi, copy the backup over the database file, and delete the `-wal` and `-shm` files next to it.
 

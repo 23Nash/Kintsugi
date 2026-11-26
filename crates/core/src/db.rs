@@ -45,11 +45,12 @@ async fn refuse_newer_database(path: &Path) -> Result<()> {
             .fetch_all(&mut conn)
             .await?;
         let known: Vec<i64> = MIGRATOR.iter().map(|m| m.version).collect();
-        if versions.iter().any(|v| !known.contains(v)) {
-            let db = versions.into_iter().max().unwrap_or(0);
-            result = Err(Error::NewerDatabase {
-                db,
-                app: app_version(),
+        if let Some(unknown) = versions.into_iter().filter(|v| !known.contains(v)).max() {
+            let app = app_version();
+            result = Err(if unknown > app {
+                Error::NewerDatabase { db: unknown, app }
+            } else {
+                Error::UnknownMigration { version: unknown }
             });
         }
     }
@@ -65,22 +66,32 @@ const BACKUPS_KEPT: usize = 5;
 /// The backup goes to a `backups` directory next to the database, named
 /// `kintsugi-<utc timestamp>-pre-<target version>.db`; only the newest
 /// [`BACKUPS_KEPT`] are kept. A new file, or one with nothing pending, gets none.
+/// If a backup for the same target version exists, no new one is written, so a
+/// migration that keeps failing cannot push older restore points out.
 async fn backup_if_pending(path: &Path) -> Result<()> {
     if !path.exists() {
         return Ok(());
     }
     let options = SqliteConnectOptions::new().filename(path).read_only(true);
     let mut conn = SqliteConnection::connect_with(&options).await?;
-    let has_table: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = '_sqlx_migrations'",
+    let user_tables: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
     )
     .fetch_one(&mut conn)
     .await?;
-    let result = if has_table > 0 {
-        let applied: Vec<i64> =
+    let result = if user_tables > 0 {
+        let has_migrations: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = '_sqlx_migrations'",
+        )
+        .fetch_one(&mut conn)
+        .await?;
+        let applied: Vec<i64> = if has_migrations > 0 {
             sqlx::query_scalar("SELECT version FROM _sqlx_migrations WHERE success = 1")
                 .fetch_all(&mut conn)
-                .await?;
+                .await?
+        } else {
+            Vec::new()
+        };
         if MIGRATOR.iter().any(|m| !applied.contains(&m.version)) {
             write_backup(&mut conn, path).await
         } else {
@@ -93,6 +104,20 @@ async fn backup_if_pending(path: &Path) -> Result<()> {
     result
 }
 
+/// Backup path for `stamp` and `version` that does not exist yet.
+///
+/// `VACUUM INTO` refuses an existing file, so a name clash gets a `-<n>` after the stamp.
+fn free_backup_path(dir: &Path, stamp: &str, version: i64) -> std::path::PathBuf {
+    let first = dir.join(format!("kintsugi-{stamp}-pre-{version}.db"));
+    if !first.exists() {
+        return first;
+    }
+    (2..)
+        .map(|n| dir.join(format!("kintsugi-{stamp}-{n}-pre-{version}.db")))
+        .find(|p| !p.exists())
+        .unwrap_or(first)
+}
+
 async fn write_backup(conn: &mut SqliteConnection, path: &Path) -> Result<()> {
     let dir = path
         .parent()
@@ -102,7 +127,15 @@ async fn write_backup(conn: &mut SqliteConnection, path: &Path) -> Result<()> {
     let stamp: String = sqlx::query_scalar("SELECT strftime('%Y%m%dT%H%M%SZ', 'now')")
         .fetch_one(&mut *conn)
         .await?;
-    let target = dir.join(format!("kintsugi-{stamp}-pre-{}.db", app_version()));
+    let suffix = format!("-pre-{}.db", app_version());
+    let already = std::fs::read_dir(&dir)?
+        .filter_map(|e| e.ok())
+        .filter_map(|e| e.file_name().into_string().ok())
+        .any(|n| n.starts_with("kintsugi-") && n.ends_with(&suffix));
+    if already {
+        return Ok(());
+    }
+    let target = free_backup_path(&dir, &stamp, app_version());
     sqlx::query("VACUUM INTO ?")
         .bind(target.to_string_lossy().into_owned())
         .execute(&mut *conn)
@@ -173,4 +206,25 @@ pub async fn health(pool: &SqlitePool) -> Result<Health> {
             .fetch_one(pool)
             .await?;
     Ok(Health { applied_migrations })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::free_backup_path;
+
+    #[test]
+    fn free_backup_path_avoids_existing_names() {
+        let dir = std::env::temp_dir().join(format!("kintsugi-free-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let first = free_backup_path(&dir, "20260101T000000Z", 7);
+        assert!(first.ends_with("kintsugi-20260101T000000Z-pre-7.db"));
+        std::fs::write(&first, b"x").unwrap();
+        let second = free_backup_path(&dir, "20260101T000000Z", 7);
+        std::fs::write(&second, b"x").unwrap();
+        let third = free_backup_path(&dir, "20260101T000000Z", 7);
+        let _ = std::fs::remove_dir_all(&dir);
+        assert_ne!(first, second);
+        assert_ne!(second, third);
+        assert_ne!(first, third);
+    }
 }
