@@ -61,11 +61,17 @@ The frontend is built first because the Tauri crate expects `dist/` to exist whe
 pnpm tauri dev
 ```
 
-The page shows the database health. The database is `kintsugi.db` in the app data directory for identifier `dev.nash.kintsugi`:
+The page shows the database health. The database lives in the app data directory for identifier `dev.nash.kintsugi`:
 
-- Windows: `%APPDATA%\dev.nash.kintsugi\kintsugi.db`
-- Linux: `~/.local/share/dev.nash.kintsugi/kintsugi.db`
-- macOS: `~/Library/Application Support/dev.nash.kintsugi/kintsugi.db`
+- `pnpm tauri dev` (debug build) opens `kintsugi-dev.db`.
+- The release build opens `kintsugi.db`.
+- `KINTSUGI_DB_PATH` overrides the full path in either build.
+
+App data directory by OS:
+
+- Windows: `%APPDATA%\dev.nash.kintsugi\`
+- Linux: `~/.local/share/dev.nash.kintsugi/`
+- macOS: `~/Library/Application Support/dev.nash.kintsugi/`
 
 ## Layout
 

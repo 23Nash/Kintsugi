@@ -57,7 +57,7 @@ Record every choice the handoff left open, every departure from it, and every ne
 - In-memory test pool: one connection, never closed, because each SQLite `:memory:` connection is a separate database.
 - Startup opens the database in `setup` with `tauri::async_runtime::block_on`. A failure is stored as `DbState::Failed(message)` instead of aborting, so the window opens and the page shows the error.
 - `CommandError { kind, message }` is the serialisable error for every command. `kind`: `databaseUnavailable` or `database`.
-- Database file name: `kintsugi.db`.
+- Database file name: `kintsugi.db` in release builds, `kintsugi-dev.db` in debug builds; `KINTSUGI_DB_PATH` overrides both.
 
 ## Schema
 
