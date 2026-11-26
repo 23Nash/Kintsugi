@@ -158,3 +158,128 @@ async fn newer_database_is_refused_without_writing() {
     assert!(message.contains(&future.to_string()), "{message}");
     assert_eq!(before, after, "file must be untouched");
 }
+
+fn backups(dir: &std::path::Path) -> Vec<String> {
+    let mut names: Vec<String> = std::fs::read_dir(dir.join("backups"))
+        .map(|rd| {
+            rd.filter_map(|e| e.ok()?.file_name().into_string().ok())
+                .collect()
+        })
+        .unwrap_or_default();
+    names.sort();
+    names
+}
+
+/// Builds a file database holding a `keepsake` row whose migration is unapplied.
+async fn database_with_pending_migration(
+    dir: &std::path::Path,
+) -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
+    let path = dir.join("k.db");
+    let pool = open(&path).await?;
+    for sql in [
+        "CREATE TABLE keepsake (note TEXT NOT NULL)",
+        "INSERT INTO keepsake (note) VALUES ('before')",
+        "DROP TABLE activity_log",
+        "DELETE FROM _sqlx_migrations",
+    ] {
+        sqlx::query(sql).execute(&pool).await?;
+    }
+    pool.close().await;
+    Ok(path)
+}
+
+#[tokio::test]
+async fn pending_migration_gets_one_valid_named_backup() {
+    let dir = unique_dir("backup").unwrap();
+    let path = database_with_pending_migration(&dir).await.unwrap();
+    assert!(backups(&dir).is_empty(), "fresh open makes no backup");
+
+    let pool = open(&path).await.unwrap();
+    let applied = health(&pool).await.unwrap().applied_migrations;
+    pool.close().await;
+
+    let names = backups(&dir);
+    assert_eq!(names.len(), 1, "{names:?}");
+    let name = &names[0];
+    let rest = name.strip_prefix("kintsugi-").expect("prefix");
+    let (stamp, version) = rest.split_once("-pre-").expect("-pre-");
+    assert_eq!(stamp.len(), 16, "{stamp}");
+    assert!(
+        stamp.ends_with('Z') && stamp.as_bytes()[8] == b'T',
+        "{stamp}"
+    );
+    assert_eq!(version, "20261111000000.db");
+    assert_eq!(applied, migration_count());
+
+    let options = sqlx::sqlite::SqliteConnectOptions::new()
+        .filename(dir.join("backups").join(name))
+        .read_only(true);
+    let backup = sqlx::SqlitePool::connect_with(options).await.unwrap();
+    let note: String = sqlx::query_scalar("SELECT note FROM keepsake")
+        .fetch_one(&backup)
+        .await
+        .unwrap();
+    backup.close().await;
+    let _ = std::fs::remove_dir_all(&dir);
+    assert_eq!(note, "before");
+}
+
+#[tokio::test]
+async fn fresh_database_and_nothing_pending_make_no_backup() {
+    let dir = unique_dir("nobackup").unwrap();
+    let path = dir.join("f.db");
+
+    open(&path).await.unwrap().close().await;
+    assert!(backups(&dir).is_empty(), "fresh database");
+
+    open(&path).await.unwrap().close().await;
+    let names = backups(&dir);
+    let _ = std::fs::remove_dir_all(&dir);
+    assert!(names.is_empty(), "nothing pending: {names:?}");
+}
+
+#[tokio::test]
+async fn only_the_newest_five_backups_are_kept() {
+    let dir = unique_dir("retention").unwrap();
+    let path = database_with_pending_migration(&dir).await.unwrap();
+    std::fs::create_dir_all(dir.join("backups")).unwrap();
+    for day in 1..=7 {
+        std::fs::write(
+            dir.join("backups")
+                .join(format!("kintsugi-2020010{day}T000000Z-pre-1.db")),
+            b"old",
+        )
+        .unwrap();
+    }
+
+    open(&path).await.unwrap().close().await;
+
+    let names = backups(&dir);
+    let _ = std::fs::remove_dir_all(&dir);
+    assert_eq!(names.len(), 5, "{names:?}");
+    assert!(names.iter().all(|n| !n.contains("20200101")), "{names:?}");
+    assert!(names.iter().all(|n| !n.contains("20200102")), "{names:?}");
+    assert!(names.iter().any(|n| n.ends_with("-pre-20261111000000.db")));
+}
+
+#[tokio::test]
+async fn refused_newer_database_gets_no_backup() {
+    let dir = unique_dir("newer-nobackup").unwrap();
+    let path = dir.join("n.db");
+    let pool = open(&path).await.unwrap();
+    sqlx::query(
+        "INSERT INTO _sqlx_migrations (version, description, success, checksum, execution_time) \
+         VALUES (99990101000000, 'future', 1, x'00', 0)",
+    )
+    .execute(&pool)
+    .await
+    .unwrap();
+    pool.close().await;
+
+    let err = open(&path).await.unwrap_err();
+
+    let names = backups(&dir);
+    let _ = std::fs::remove_dir_all(&dir);
+    assert!(matches!(err, Error::NewerDatabase { .. }));
+    assert!(names.is_empty(), "{names:?}");
+}

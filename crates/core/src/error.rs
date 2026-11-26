@@ -9,6 +9,9 @@ pub enum Error {
     #[error("migration error: {0}")]
     Migration(#[from] sqlx::migrate::MigrateError),
 
+    #[error("backup error: {0}")]
+    Io(#[from] std::io::Error),
+
     #[error(
         "this database was made by a newer Kintsugi (database version {db}, this app knows up to {app})"
     )]
