@@ -13,6 +13,11 @@ pub type Pool = SqlitePool;
 /// Migrations embedded from `crates/core/migrations` at compile time.
 static MIGRATOR: Migrator = sqlx::migrate!("./migrations");
 
+/// Number of migrations embedded in this build, as opposed to applied to a database.
+pub fn migration_count() -> i64 {
+    MIGRATOR.iter().count() as i64
+}
+
 /// Opens (creating if missing) the SQLite file at `path` and runs pending migrations.
 pub async fn open(path: &Path) -> Result<SqlitePool> {
     let options = SqliteConnectOptions::new()
