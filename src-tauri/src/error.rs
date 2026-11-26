@@ -45,7 +45,7 @@ impl From<tracker_core::Error> for CommandError {
             Error::NewerDatabase { .. } => (ErrorKind::DatabaseUnavailable, None),
             Error::NotFound => (ErrorKind::NotFound, None),
             Error::Validation { field, .. } => (ErrorKind::Validation, field),
-            Error::Serialization(_) => (ErrorKind::Internal, None),
+            Error::Serialization(_) | Error::Io(_) => (ErrorKind::Internal, None),
         };
         Self {
             kind,
@@ -125,6 +125,8 @@ mod tests {
         assert_eq!(json(Error::NotFound)["kind"], "notFound");
         let ser = serde_json::from_str::<u8>("x").unwrap_err();
         assert_eq!(json(Error::Serialization(ser))["kind"], "internal");
+        let io = std::io::Error::other("disk full");
+        assert_eq!(json(Error::Io(io))["kind"], "internal");
     }
 
     #[test]

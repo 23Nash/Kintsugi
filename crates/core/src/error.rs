@@ -9,6 +9,9 @@ pub enum Error {
     #[error("migration error: {0}")]
     Migration(#[from] sqlx::migrate::MigrateError),
 
+    #[error("backup error: {0}")]
+    Io(#[from] std::io::Error),
+
     #[error("not found")]
     NotFound,
 

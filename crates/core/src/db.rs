@@ -57,12 +57,78 @@ async fn refuse_newer_database(path: &Path) -> Result<()> {
     result
 }
 
+/// Number of pre-migration backups kept.
+const BACKUPS_KEPT: usize = 5;
+
+/// Writes a `VACUUM INTO` backup when the file already has tables and migrations pending.
+///
+/// The backup goes to a `backups` directory next to the database, named
+/// `kintsugi-<utc timestamp>-pre-<target version>.db`; only the newest
+/// [`BACKUPS_KEPT`] are kept. A new file, or one with nothing pending, gets none.
+async fn backup_if_pending(path: &Path) -> Result<()> {
+    if !path.exists() {
+        return Ok(());
+    }
+    let options = SqliteConnectOptions::new().filename(path).read_only(true);
+    let mut conn = SqliteConnection::connect_with(&options).await?;
+    let has_table: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = '_sqlx_migrations'",
+    )
+    .fetch_one(&mut conn)
+    .await?;
+    let result = if has_table > 0 {
+        let applied: Vec<i64> =
+            sqlx::query_scalar("SELECT version FROM _sqlx_migrations WHERE success = 1")
+                .fetch_all(&mut conn)
+                .await?;
+        if MIGRATOR.iter().any(|m| !applied.contains(&m.version)) {
+            write_backup(&mut conn, path).await
+        } else {
+            Ok(())
+        }
+    } else {
+        Ok(())
+    };
+    conn.close().await?;
+    result
+}
+
+async fn write_backup(conn: &mut SqliteConnection, path: &Path) -> Result<()> {
+    let dir = path
+        .parent()
+        .unwrap_or_else(|| Path::new("."))
+        .join("backups");
+    std::fs::create_dir_all(&dir)?;
+    let stamp: String = sqlx::query_scalar("SELECT strftime('%Y%m%dT%H%M%SZ', 'now')")
+        .fetch_one(&mut *conn)
+        .await?;
+    let target = dir.join(format!("kintsugi-{stamp}-pre-{}.db", app_version()));
+    sqlx::query("VACUUM INTO ?")
+        .bind(target.to_string_lossy().into_owned())
+        .execute(&mut *conn)
+        .await?;
+
+    let mut names: Vec<String> = std::fs::read_dir(&dir)?
+        .filter_map(|e| e.ok())
+        .filter_map(|e| e.file_name().into_string().ok())
+        .filter(|n| n.starts_with("kintsugi-") && n.ends_with(".db"))
+        .collect();
+    names.sort();
+    let excess = names.len().saturating_sub(BACKUPS_KEPT);
+    for name in names.into_iter().take(excess) {
+        std::fs::remove_file(dir.join(name))?;
+    }
+    Ok(())
+}
+
 /// Opens (creating if missing) the SQLite file at `path` and runs pending migrations.
 ///
 /// Sets WAL, `synchronous = NORMAL`, foreign keys and a 5 s busy timeout. Refuses,
-/// before writing anything, a file made by a newer build.
+/// before writing anything, a file made by a newer build. Backs up an existing
+/// database before applying pending migrations.
 pub async fn open(path: &Path) -> Result<SqlitePool> {
     refuse_newer_database(path).await?;
+    backup_if_pending(path).await?;
     let options = SqliteConnectOptions::new()
         .filename(path)
         .create_if_missing(true)

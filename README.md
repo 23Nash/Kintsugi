@@ -73,6 +73,14 @@ App data directory by OS:
 - Linux: `~/.local/share/dev.nash.kintsugi/`
 - macOS: `~/Library/Application Support/dev.nash.kintsugi/`
 
+## Backups
+
+When an existing database has pending migrations, `open` first writes a backup to a `backups` directory next to the database file, named `kintsugi-<utc timestamp>-pre-<target version>.db`. The newest 5 are kept. A new database, or a launch with nothing pending, makes none.
+
+To restore by hand: quit Kintsugi, copy the backup over the database file, and delete the `-wal` and `-shm` files next to it.
+
+## Logs
+
 Logs are written to the app log directory, in `dev.nash.kintsugi` (file `kintsugi.log`, rotated at about 1 MB, 5 files kept), and to stdout:
 
 - Windows: `%LOCALAPPDATA%\dev.nash.kintsugi\logs\`
