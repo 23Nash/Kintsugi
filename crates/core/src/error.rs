@@ -8,6 +8,11 @@ pub enum Error {
 
     #[error("migration error: {0}")]
     Migration(#[from] sqlx::migrate::MigrateError),
+
+    #[error(
+        "this database was made by a newer Kintsugi (database version {db}, this app knows up to {app})"
+    )]
+    NewerDatabase { db: i64, app: i64 },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
