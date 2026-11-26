@@ -5,12 +5,34 @@ export type Health = {
   appliedMigrations: number;
 };
 
-export type ApiErrorKind = "databaseUnavailable" | "database" | "unknown";
+/**
+ * Drift guard: mirrors `ErrorKind` in `src-tauri/src/error.rs`. The Rust test
+ * `serialises_the_exact_kind_list` and the test in `api.test.ts` assert the
+ * same list; change all four together.
+ */
+export const API_ERROR_KINDS = [
+  "databaseUnavailable",
+  "database",
+  "validation",
+  "notFound",
+  "network",
+  "rateLimited",
+  "upstream",
+  "cancelled",
+  "internal",
+] as const;
+
+export type ApiErrorKind = (typeof API_ERROR_KINDS)[number] | "unknown";
 
 export type ApiError = {
   kind: ApiErrorKind;
   message: string;
+  field?: string;
 };
+
+function isListedKind(kind: unknown): kind is (typeof API_ERROR_KINDS)[number] {
+  return API_ERROR_KINDS.some((listed) => listed === kind);
+}
 
 /** Normalises any rejection into an ApiError. Idempotent. */
 export function toApiError(error: unknown): ApiError {
@@ -21,11 +43,12 @@ export function toApiError(error: unknown): ApiError {
     "message" in error &&
     typeof error.message === "string"
   ) {
-    const kind =
-      error.kind === "databaseUnavailable" || error.kind === "database"
-        ? error.kind
-        : "unknown";
-    return { kind, message: error.message };
+    const kind = isListedKind(error.kind) ? error.kind : "unknown";
+    const result: ApiError = { kind, message: error.message };
+    if ("field" in error && typeof error.field === "string") {
+      result.field = error.field;
+    }
+    return result;
   }
   return { kind: "unknown", message: String(error) };
 }

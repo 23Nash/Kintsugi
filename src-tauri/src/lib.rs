@@ -2,7 +2,8 @@
 //! No domain logic or SQL here; that lives in `tracker-core`.
 
 mod commands;
-mod error;
+// Public so the kinds reserved for later milestones are not dead code.
+pub mod error;
 mod state;
 
 use std::path::{Path, PathBuf};
