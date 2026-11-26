@@ -85,18 +85,19 @@ Record every choice the handoff left open, every departure from it, and every ne
 
 ## Dependencies added
 
-| Package                                                | Why                                                                       |
-| ------------------------------------------------------ | ------------------------------------------------------------------------- |
-| `sqlx`                                                 | Database access and migrations (handoff)                                  |
-| `tokio` (dev, core)                                    | Async test runtime (`#[tokio::test]`); the app uses Tauri's Tokio runtime |
-| `thiserror`                                            | Core error type (handoff)                                                 |
-| `serde`                                                | Serialise `Health` and `CommandError` to the frontend                     |
-| `eslint`, `@eslint/js`, `typescript-eslint`, `globals` | ESLint (handoff)                                                          |
-| `eslint-plugin-react-hooks`                            | Enforce hook rules; the reducer pattern leans on `useEffect`              |
-| `prettier`, `eslint-config-prettier`                   | Prettier, and keep ESLint from fighting it (handoff)                      |
-| `vitest`                                               | Tests (handoff)                                                           |
-| `jsdom`                                                | DOM for component tests                                                   |
-| `@testing-library/react`, `@testing-library/dom`       | Render components and query by role in tests                              |
+| Package                                                | Why                                                                                                                              |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `sqlx`                                                 | Database access and migrations (handoff)                                                                                         |
+| `tokio` (dev, core)                                    | Async test runtime (`#[tokio::test]`); the app uses Tauri's Tokio runtime                                                        |
+| `thiserror`                                            | Core error type (handoff)                                                                                                        |
+| `serde`                                                | Serialise `Health` and `CommandError` to the frontend                                                                            |
+| `eslint`, `@eslint/js`, `typescript-eslint`, `globals` | ESLint (handoff)                                                                                                                 |
+| `eslint-plugin-react-hooks`                            | Enforce hook rules; the reducer pattern leans on `useEffect`                                                                     |
+| `prettier`, `eslint-config-prettier`                   | Prettier, and keep ESLint from fighting it (handoff)                                                                             |
+| `vitest`                                               | Tests (handoff)                                                                                                                  |
+| `jsdom`                                                | DOM for component tests                                                                                                          |
+| `@testing-library/react`, `@testing-library/dom`       | Render components and query by role in tests                                                                                     |
+| `stylelint` (18.0.0, exact)                            | Fail `pnpm lint` on raw colors outside `src/ui/tokens.css`. Owner-approved 2026-11-26. 18.0.0, not 18.1.0: 18.1.0 was 6 days old |
 
 ## CI
 
