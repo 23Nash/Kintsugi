@@ -63,6 +63,8 @@ Each numbered item below is one small PR that passes the done gate by itself.
 
 ## M0: Foundations
 
+**Spec:** [#7](https://github.com/23Nash/Kintsugi/issues/7)
+
 **Goal:** fix problems in the current setup before any real data exists.
 
 **Why first:** step 3 must land before any new database migration, or your real database is at risk.
