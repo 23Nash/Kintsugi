@@ -6,5 +6,5 @@ pub mod db;
 pub mod error;
 pub mod tracker;
 
-pub use db::{Health, Pool, health, open, open_in_memory};
+pub use db::{Health, Pool, health, migration_count, open, open_in_memory};
 pub use error::{Error, Result};
