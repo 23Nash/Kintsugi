@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "dev:log": "tauri dev > tauri-dev.log 2>&1",
     "lint": "eslint . && stylelint \"src/**/*.css\" && prettier --check .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

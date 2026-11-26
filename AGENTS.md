@@ -4,7 +4,7 @@ Kintsugi is a local desktop app that tracks the owner's competitive programming 
 
 ## Commands
 
-- Run the app: `pnpm dev:log` in the background. It runs `pnpm tauri dev` and writes output to `tauri-dev.log`. Wait on it with a background `until grep -qE "Running|error" tauri-dev.log; do sleep 1; done`.
+- Run the app: `pnpm dev:log` in the background. It runs `pnpm tauri dev` and writes output to `tauri-dev.log`. Wait on it with a background `until grep -qE "kintsugi\.exe|error|ELIFECYCLE" tauri-dev.log; do sleep 1; done`. `ELIFECYCLE ... -1` means the window was closed.
 - Format: `cargo fmt --all` and `pnpm format`. The other checks are in the done gate below.
 
 ## Done gate
