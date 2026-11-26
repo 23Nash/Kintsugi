@@ -1,12 +1,12 @@
-use tracker_core::{health, open, open_in_memory};
+use tracker_core::{health, migration_count, open, open_in_memory};
 
 #[tokio::test]
-async fn health_reports_one_applied_migration() {
+async fn health_reports_every_embedded_migration_applied() {
     let pool = open_in_memory().await.unwrap();
 
     let result = health(&pool).await.unwrap();
 
-    assert_eq!(result.applied_migrations, 1);
+    assert_eq!(result.applied_migrations, migration_count());
 }
 
 #[tokio::test]
@@ -60,5 +60,23 @@ async fn reopening_a_file_does_not_rerun_migrations() {
     let _ = std::fs::remove_dir_all(&dir);
 
     assert_eq!(rows, 1);
-    assert_eq!(result.applied_migrations, 1);
+    assert_eq!(result.applied_migrations, migration_count());
+}
+
+#[test]
+fn migration_count_matches_the_migration_files() {
+    let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("migrations");
+    let files = std::fs::read_dir(dir)
+        .unwrap()
+        .filter(|e| {
+            e.as_ref()
+                .unwrap()
+                .path()
+                .extension()
+                .is_some_and(|x| x == "sql")
+        })
+        .count();
+
+    assert!(migration_count() >= 1);
+    assert_eq!(migration_count(), files as i64);
 }
