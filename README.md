@@ -73,6 +73,12 @@ App data directory by OS:
 - Linux: `~/.local/share/dev.nash.kintsugi/`
 - macOS: `~/Library/Application Support/dev.nash.kintsugi/`
 
+Logs are written to the app log directory, in `dev.nash.kintsugi` (file `kintsugi.log`, rotated at about 1 MB, 5 files kept), and to stdout:
+
+- Windows: `%LOCALAPPDATA%\dev.nash.kintsugi\logs\`
+- Linux: `~/.local/share/dev.nash.kintsugi/logs/`
+- macOS: `~/Library/Logs/dev.nash.kintsugi/`
+
 ## Layout
 
 ```

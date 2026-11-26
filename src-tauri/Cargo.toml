@@ -18,6 +18,8 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
+tauri-plugin-log = "2.10.2"
+log = "0.4.35"
 tracker-core.workspace = true
 serde.workspace = true
 

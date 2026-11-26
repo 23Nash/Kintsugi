@@ -98,6 +98,10 @@ Record every choice the handoff left open, every departure from it, and every ne
 | `jsdom`                                                | DOM for component tests                                                                                                          |
 | `@testing-library/react`, `@testing-library/dom`       | Render components and query by role in tests                                                                                     |
 | `stylelint` (18.0.0, exact)                            | Fail `pnpm lint` on raw colors outside `src/ui/tokens.css`. Owner-approved 2026-11-26. 18.0.0, not 18.1.0: 18.1.0 was 6 days old |
+| `tauri-plugin-log` (2.10.2, Rust only)                 | Log file in the app log dir plus stdout, with rotation. 2.x to match Tauri 2; 3.0 is alpha. No JS package, no capability         |
+| `log` (src-tauri)                                      | Direct dependency so the shell logs through the same facade the plugin installs                                                  |
+
+- Removed `panic = "abort"` from the release profile (plan decision 4): a panic in a background task unwinds instead of killing the app, and the panic hook can log it.
 
 ## CI
 
