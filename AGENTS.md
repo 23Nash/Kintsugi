@@ -7,6 +7,10 @@ Kintsugi is a local desktop app that tracks the owner's competitive programming 
 - Run the app: `pnpm dev:log` in the background. It runs `pnpm tauri dev` and writes output to `tauri-dev.log`. Wait on it with a background `until grep -qE "kintsugi\.exe|error|ELIFECYCLE" tauri-dev.log; do sleep 1; done`. `ELIFECYCLE ... -1` means the window was closed.
 - Format: `cargo fmt --all` and `pnpm format`. The other checks are in the done gate below.
 
+## Plan
+
+- The next-phase plan is `docs/plan/steps.md`: milestones M0 to M7, each step one small PR. Reasoning and detail are in `docs/plan/README.md` and its appendices. Take the next unstarted step in milestone order. Where the plan lists an owner decision, use its default unless the owner has answered.
+
 ## Done gate
 
 A task is done when this sequence passes, in order, with no edits to checks or config to make it pass:
