@@ -290,3 +290,98 @@ async fn refused_newer_database_gets_no_backup() {
     assert!(matches!(err, Error::NewerDatabase { .. }));
     assert!(names.is_empty(), "{names:?}");
 }
+
+/// Puts an already-migrated file back into the "migrations pending" state.
+async fn make_pending_again(path: &std::path::Path) -> Result<(), sqlx::Error> {
+    let options = sqlx::sqlite::SqliteConnectOptions::new().filename(path);
+    let pool = sqlx::SqlitePool::connect_with(options).await?;
+    for sql in ["DROP TABLE activity_log", "DELETE FROM _sqlx_migrations"] {
+        sqlx::query(sql).execute(&pool).await?;
+    }
+    pool.close().await;
+    Ok(())
+}
+
+#[tokio::test]
+async fn repeated_opens_keep_older_backups_and_do_not_fail() {
+    let dir = unique_dir("repeat").unwrap();
+    let path = database_with_pending_migration(&dir).await.unwrap();
+    std::fs::create_dir_all(dir.join("backups")).unwrap();
+    for day in 1..=4 {
+        std::fs::write(
+            dir.join("backups")
+                .join(format!("kintsugi-2020010{day}T000000Z-pre-1.db")),
+            b"old",
+        )
+        .unwrap();
+    }
+
+    for _ in 0..3 {
+        open(&path).await.unwrap().close().await;
+        make_pending_again(&path).await.unwrap();
+    }
+
+    let names = backups(&dir);
+    let _ = std::fs::remove_dir_all(&dir);
+    assert_eq!(names.len(), 5, "{names:?}");
+    for day in 1..=4 {
+        assert!(
+            names.iter().any(|n| n.contains(&format!("2020010{day}"))),
+            "{names:?}"
+        );
+    }
+    let current = names
+        .iter()
+        .filter(|n| n.ends_with("-pre-20261111000000.db"))
+        .count();
+    assert_eq!(current, 1, "{names:?}");
+}
+
+#[tokio::test]
+async fn database_with_tables_but_no_migrations_table_is_backed_up() {
+    let dir = unique_dir("legacy").unwrap();
+    let path = dir.join("l.db");
+    let options = sqlx::sqlite::SqliteConnectOptions::new()
+        .filename(&path)
+        .create_if_missing(true);
+    let pool = sqlx::SqlitePool::connect_with(options).await.unwrap();
+    sqlx::query("CREATE TABLE keepsake (note TEXT)")
+        .execute(&pool)
+        .await
+        .unwrap();
+    pool.close().await;
+
+    open(&path).await.unwrap().close().await;
+
+    let names = backups(&dir);
+    let _ = std::fs::remove_dir_all(&dir);
+    assert_eq!(names.len(), 1, "{names:?}");
+}
+
+#[tokio::test]
+async fn unknown_older_migration_is_not_called_newer() {
+    let dir = unique_dir("unknown").unwrap();
+    let path = dir.join("u.db");
+    let pool = open(&path).await.unwrap();
+    sqlx::query(
+        "INSERT INTO _sqlx_migrations (version, description, success, checksum, execution_time) \
+         VALUES (20200101000000, 'older', 1, x'00', 0)",
+    )
+    .execute(&pool)
+    .await
+    .unwrap();
+    pool.close().await;
+
+    let err = open(&path).await.unwrap_err();
+
+    let _ = std::fs::remove_dir_all(&dir);
+    assert!(matches!(
+        err,
+        Error::UnknownMigration {
+            version: 20200101000000
+        }
+    ));
+    let message = err.to_string();
+    assert!(message.contains("20200101000000"), "{message}");
+    assert!(!message.contains("newer"), "{message}");
+}

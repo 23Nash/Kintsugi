@@ -42,7 +42,9 @@ impl From<tracker_core::Error> for CommandError {
         let message = error.to_string();
         let (kind, field) = match error {
             Error::Database(_) | Error::Migration(_) => (ErrorKind::Database, None),
-            Error::NewerDatabase { .. } => (ErrorKind::DatabaseUnavailable, None),
+            Error::NewerDatabase { .. } | Error::UnknownMigration { .. } => {
+                (ErrorKind::DatabaseUnavailable, None)
+            }
             Error::NotFound => (ErrorKind::NotFound, None),
             Error::Validation { field, .. } => (ErrorKind::Validation, field),
             Error::Serialization(_) | Error::Io(_) => (ErrorKind::Internal, None),
