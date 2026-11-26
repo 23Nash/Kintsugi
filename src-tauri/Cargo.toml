@@ -23,5 +23,9 @@ log = "0.4.35"
 tracker-core.workspace = true
 serde.workspace = true
 
+[dev-dependencies]
+serde_json.workspace = true
+sqlx.workspace = true
+
 [lints]
 workspace = true

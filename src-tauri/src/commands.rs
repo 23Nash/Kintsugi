@@ -8,8 +8,5 @@ use crate::state::DbState;
 
 #[tauri::command]
 pub async fn health(db: State<'_, DbState>) -> Result<Health, CommandError> {
-    match db.inner() {
-        DbState::Ready(pool) => Ok(tracker_core::health(pool).await?),
-        DbState::Failed(message) => Err(CommandError::unavailable(message)),
-    }
+    Ok(tracker_core::health(db.pool()?).await?)
 }
