@@ -10,7 +10,7 @@ Kintsugi is a local desktop app that tracks the owner's competitive programming 
 ## Plan
 
 - The roadmap is `docs/plan/steps.md`: milestones M0 to M7. Reasoning and detail are in `docs/plan/README.md` and its appendices. Where the plan lists an owner decision, use its default unless the owner has answered.
-- The owner starts a milestone by turning it into a spec issue with tickets (`/to-spec`, `/to-tickets`); `steps.md` links each started milestone to its spec issue. Agents build tickets from the GitHub board, not steps straight from `steps.md`.
+- The owner starts a milestone by turning it into a spec issue with tickets (`/to-spec`, `/to-tickets`); `steps.md` links each started milestone to its spec issue. Agents build tickets from the GitHub board, not steps straight from `steps.md`: the owner runs `/orchestrate` (`.claude/skills/orchestrate/SKILL.md`). Leave tickets assigned or under an `orchestrating` spec to it.
 
 ## Done gate
 
