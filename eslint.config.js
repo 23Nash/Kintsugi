@@ -26,10 +26,10 @@ export default defineConfig([
       "no-restricted-imports": [
         "error",
         {
-          paths: [
+          patterns: [
             {
-              name: "@tauri-apps/api/core",
-              message: "Call Tauri commands through src/lib/api.ts.",
+              group: ["@tauri-apps/*"],
+              message: "Import Tauri through src/lib/api.ts.",
             },
           ],
         },
