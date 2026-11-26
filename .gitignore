@@ -34,3 +34,6 @@ target/
 *.db-shm
 *.sqlite
 *.sqlite3
+
+# Claude Code per-machine settings
+.claude/settings.local.json
