@@ -1,0 +1,24 @@
+.ui-select-wrap {
+  position: relative;
+  display: block;
+}
+
+.ui-select {
+  appearance: none;
+  padding-right: calc(var(--space-2) + 16px + var(--space-1));
+  cursor: pointer;
+}
+
+.ui-select-wrap__icon {
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.ui-select option {
+  background: var(--surface-raised);
+  color: var(--text);
+}

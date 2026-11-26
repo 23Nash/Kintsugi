@@ -1,0 +1,78 @@
+.ui-table-wrap {
+  overflow: auto;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.ui-table {
+  width: 100%;
+  font: var(--type-body);
+}
+
+.ui-table__caption {
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  font: var(--type-title);
+  text-align: left;
+}
+
+.ui-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: var(--row-height);
+  background: var(--surface-raised);
+  /* Sticky cells lose collapsed borders; draw the line with a shadow. */
+  box-shadow: inset 0 -1px 0 var(--border);
+  color: var(--text-muted);
+  font: var(--type-label);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.ui-table__cell {
+  height: var(--row-height);
+  padding: 0 var(--space-2);
+  vertical-align: middle;
+}
+
+.ui-table__cell:first-child {
+  padding-left: var(--space-4);
+}
+
+.ui-table__cell:last-child {
+  padding-right: var(--space-4);
+}
+
+.ui-table tbody tr + tr td {
+  border-top: 1px solid var(--border);
+}
+
+.ui-table__cell--numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ui-table thead .ui-table__cell--numeric {
+  text-align: right;
+}
+
+.ui-table__cell--mono {
+  font: var(--type-mono);
+}
+
+.ui-table--zebra tbody tr:nth-child(even) {
+  background: var(--surface-sunken);
+}
+
+.ui-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.ui-table tbody tr.ui-table__row--selected {
+  background: var(--accent-soft);
+}
+
+.ui-table__empty {
+  padding: 0;
+}
