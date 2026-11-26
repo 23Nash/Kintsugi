@@ -1,7 +1,14 @@
 use tracker_core::{Error, health, migration_count, open, open_in_memory};
 
 fn unique_dir(name: &str) -> std::io::Result<std::path::PathBuf> {
-    let dir = std::env::temp_dir().join(format!("kintsugi-test-{}-{name}", std::process::id()));
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let dir = std::env::temp_dir().join(format!(
+        "kintsugi-test-{}-{nanos}-{name}",
+        std::process::id()
+    ));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir)?;
     Ok(dir)
